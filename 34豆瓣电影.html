@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+	<link rel="stylesheet" href="css/loading.css" />
+	<link rel="stylesheet" href="css/movieDetail.css" />
+	<title>豆瓣电影</title>
+	<style type="text/css">
+		[v-cloak]{
+			display: none;
+		}
+		
+		.detailTitle
+			{
+				height: 45px;
+				background-color: lightskyblue;
+				display: flex;
+				flex-direction: row;
+				position: relative;
+				width: 100%;
+				justify-content: center;
+				align-items: center;
+			}
+			.detailTitle>a
+			{
+				position: absolute;
+				width: 50px;
+				height: 45px;
+				line-height: 45px;
+				text-align: center;
+				display: block;
+				left: 0px;
+				top: 0px;
+				font-weight: bold;
+			}
+			.scaleRouter-enter
+			{
+				transform: translateX(100%);
+			}
+			.scaleRouter-leave-to
+			{
+				transform: scale(0);
+			}
+			.scaleRouter-enter-active,.scaleRouter-leave-active
+			{
+				transition: all 0.5s;
+			}
+	</style>
+</head>
+<body>
+	<div id="app" v-cloak="">
+		<div class="pagetitle">
+			豆瓣电影{{titlename}}
+		</div>
+		<div class="content">
+			<reying v-show="flag"></reying>   
+			<shangying v-show="!flag"></shangying>
+			<transition name="scaleRouter">
+				<router-view></router-view>	
+			</transition>
+		</div>
+		<div class="footer">
+			<ul>
+				<li :class="{'active':flag==true}" @click="flag=true"><span>正在热映</span></li>
+				<li :class="{'active':flag==false}" @click="flag=false"><spn>即将上映</spn></li>
+			</ul>
+		</div>
+			
+	</div>
+	
+	
+	
+	<!--正在热映的组件-->
+	<template id="reying">
+		<div class="reyinglist">
+			<loading  v-if="loading"></loading>
+			<movieitem v-else  v-for="item in subjects" :item='item'></movieitem>
+		</div>
+	</template>   
+	<!--即将上映的组件-->
+	<template id="shangying">
+		<div class="reyinglist">
+			<loading v-if="loading"></loading>
+			<movieitem v-else v-for="item in subjects" :item='item'></movieitem>
+		</div>
+	</template>
+	<!--电影信息-->
+	<template id="movieinfo"></template>
+	<!--电影列表里的每一项-->
+	<template id="movieitem">
+		<router-link class="item" :to="{name:'detail',params:{movieId:item.id}}">
+		<div class="con1">
+			
+				<div class="left"><img :src="item.images.small"/></div>
+				<div class="right">
+					<div class="first">
+						<span class="m-title">{{item.title}}</span>
+						<span class="m-year">{{item.year}}</span>
+					</div>
+					<div class="second">
+						评分<span class="m-star">{{item.rating.average}}</span>
+					</div>
+					<div class="third">
+						导演<span v-for="d in item.directorsr">{{d.name}}</span>
+					</div>
+					<div class="fourth">
+						主演<span v-for="c in item.casts">{{c.name}}</span>
+					</div>
+				</div>
+				
+			</div>
+		</router-link>	
+	</template>
+	<!--登录时的Loading动画-->
+	<template id="loading">
+		<div class="box">
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
+		</div>
+	</template>
+	
+	<!--电影详细信息组件-->
+	<template id="detail">
+			<loading v-if="loading"></loading>
+			<div class="moveDetail" v-else>
+				<div class="detailTitle">
+					<a href="javascript:history.back()">返回</a>   <!--点击就返回-->
+					【{{movieTitle}}】详细信息
+				</div>
+				<div class="film-detail">
+					<div class="film-item">
+						<div class="film-image">
+							<img src="img/item1.jpg"/>
+						</div>
+						<div class="film-info">
+							<div>
+								<span class="film-title">{{film.title}}</span>
+								<span class="film.year">{{film.year}}</span>
+							</div>
+							<div class="film-rating">
+								<span class="label">评分</span>
+								<span class="rating">{{film.rating.avarage}}</span>
+							</div>
+							<div class="directors">
+								<span class="label">导演：</span>
+								<span v-for="director in film.directors">
+                                <span class="person">{{director.name}}</span>
+								</span>
+							</div>
+							<div class="casts">
+								<span class="label">主演：</span>
+								<span v-for="cast in film.casts">
+                                <span class="person">{{cast.name}}</span>
+								</span>
+
+							</div>
+							<div class="genres">
+								<span class="label">类型：</span>
+								<span v-for="genre in film.genres">
+                                <span class="person">{{genre}}</span>
+								</span>
+							</div>
+							<div class="genres">
+								<span class="label">国家/地区：</span>
+								<span v-for="country in film.countries">
+                                <span class="person">{{country}}</span>
+								</span>
+							</div>
+							<div class="collect-wish">
+								<div>
+									看过(
+									<span>{{film.collect_count}}</span>)
+								</div>
+								<div>
+									想看(
+									<span>{{film.wish_count}}</span>)
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="summary">
+						<span class="title">剧情简介</span>
+						<div class="content">
+							{{film.summary}}
+						</div>
+					</div>
+				</div>
+			</div>
+		</template>
+</body>
+<script type="text/javascript" src="js/vue.js" ></script>
+<script type="text/javascript" src="js/vue-router.js" ></script>
+<script type="text/javascript" src="js/vue-resource.js" ></script>
+<script>
+	var loading={
+		template:"#loading"
+	}
+	var movieitem={
+		template:"#movieitem",
+		props:['item']            
+	}
+//	注册reying组件
+	var reying={
+		template:"#reying",
+		data(){
+			return{
+				subjects:[],
+				loading:true    //默认加载Loading动画 
+			} 
+		},
+		components:{   
+			"movieitem":movieitem,
+			"loading":loading
+		},
+		mounted(){              // 组件被加载的时候,会自动执行的区域 ,这里用来主键加载的时候,自动执行接口里面的数据
+			this.$http.get("http://www.softeem.xin:9988/douban/getIntheathers?cityAddress=武汉").then(res => {
+				console.log(res.data);       //接收接口里面传过来的值
+				this.subjects=res.data.subjects;
+				this.loading=false;    //接受到数据后loading动画为false
+			});
+		}
+	}
+//	注册上映组件
+	var shangying={
+		template:"#shangying",
+		data(){
+			return{
+				subjects:[],
+				loading:true   
+			}
+		},
+		
+		mounted(){
+			this.$http.get("http://www.softeem.xin:9988/DouBan/getCommon_soon?cityAddress=武汉").then(res => {
+				this.subjects=res.data.subjects;
+				this.loading=false;
+			});
+		},
+		components:{
+			"movieitem":movieitem,
+			"loading":loading
+		}
+	}
+	
+//	电影详细信息组件
+	var detail={
+		template:"#detail",
+		data(){
+			return{
+				film:{},
+				loading:true,
+				movieTitle:""
+			}
+		},
+		mounted(){
+				console.log(this.$route); 
+				//var movieId=this.$route.query.movieId;   //通过路由，接收后台的参数值
+				var movieId=this.$route.params.movieId;
+				this.$http.post("http://www.softeem.xin:9988/Douban/getDetail",{
+					dataId:movieId
+				},{emulateJSON:true}).then(res=>{
+					this.film=res.body;   //注意一下，get取值的时候，我们是res.data,post取返回值用res.body
+					this.movieTitle=res.body.title;
+					this.loading=false;
+				});
+			},
+		components:{
+				loading
+			}
+	};
+	//路由 跳转视图
+	var router=new VueRouter({
+			routes:[
+				{
+					path:"/detail",
+					name:'detail',
+					component:detail
+				}
+			]
+		});
+	
+	new Vue({
+		el:"#app",
+		data:{
+			flag:true,
+		},
+		computed:{
+			titlename:function(){
+				return this.flag?"【正在热映】":"【即将上映】";
+			}
+		},
+		components:{
+			"reying":reying,
+			"shangying":shangying
+		},
+		router:router
+		
+	});
+</script>
+<style>
+	
+	*{
+		margin: 0;
+		padding: 0;
+		list-style-type: none;
+	}
+	a{
+		text-decoration: none;
+	}
+	.active{
+		background-color: mediumpurple;
+	}
+	.pagetitle{
+		width: 100%;
+		height: 50px;
+		background-color: mediumpurple;
+		position: fixed;
+		text-align: center;
+		line-height: 50px;
+		top: 0;
+		left: 0;
+	}
+	
+	.footer ul{
+		width: 100%;
+		height: 50px;
+		display: flex;
+		flex-direction: row;
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		z-index: 99;
+		background-color: white;
+	}
+	.footer ul li{
+		width: 50%;
+		height: 100%;
+		display: flex;
+		flex-direction: row;
+		border-top: 1px solid purple;
+		justify-content: center;
+		align-items: center;
+		overflow: hidden;
+	}
+	.reyinglist{
+		margin-top: 50px;
+	}
+	.reyinglist .con1{
+		display: flex;
+		flex-direction: row;
+	}
+	.reyinglist .con1 .left{
+		width: 100px;
+		min-height: 146px;
+	}
+	.reyinglist .con1 .left img{
+		width: 100px;
+		height: 140px;
+	}
+	.reyinglist .con1 .right{
+		flex: 1;
+	}
+</style>
+</html>
+<!--在这个页面里面 有3个内容  一个是正在热映的  ，一个是即将上映的 ，还有一个电影信息的，所以将三个内容分为3个组件-->
+<!--因为正在热映里面的电影信息排列的样式一样 ，所以可以单独再写一个组件 ，然后在正在热映组件里面去循环-->
+<!--数据都存放在接口里面，所以使用Mounted在组件加载的时候加接口的数据传到当前组件来 -->
+<!--我要将电影列表里面的每一项都循环出来，因为实在reying组件里面的，所以我要用props将数据传到子组件里面去-->
